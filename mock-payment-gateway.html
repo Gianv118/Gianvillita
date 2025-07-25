@@ -1,0 +1,239 @@
+<<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasarela de Pago Simulada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0; /* Un gris claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .payment-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .payment-container h1 {
+            color: #2d3748;
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        .payment-details p {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        .payment-details strong {
+            color: #2b6cb0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .payment-button {
+            background-color: #38a169; /* Verde */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            margin-top: 25px;
+            width: 100%;
+        }
+        .payment-button:hover {
+            background-color: #2f855a; /* Verde más oscuro */
+            transform: translateY(-2px);
+        }
+        .qr-code-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .qr-code-section img {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            display: block; /* Centrar la imagen */
+        }
+        .qr-code-section p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <h1>Pasarela de Pago Segura</h1>
+
+        <div class="payment-details mb-6">
+            <p>Total a pagar: $<strong id="display-total-amount">0.00</strong></p>
+            <p>Boletos Adulto: <span id="display-adult-tickets">0</span></p>
+            <p>Boletos Infantil: <span id="display-child-tickets">0</span></p>
+            <p>Boletos Adulto Mayor: <span id="display-senior-tickets">0</span></p>
+        </div>
+
+        <form id="payment-form">
+            <div class="form-group">
+                <label for="payment-method">Método de Pago:</label>
+                <select id="payment-method" class="form-select" onchange="togglePaymentFields()">
+                    <option value="credit_debit">Tarjeta de Crédito/Débito</option>
+                    <option value="qr_wallet">Billetera Virtual (QR)</option>
+                </select>
+            </div>
+
+            <div id="card-fields">
+                <div class="form-group">
+                    <label for="card-number">Número de Tarjeta:</label>
+                    <input type="text" id="card-number" placeholder="XXXX XXXX XXXX XXXX" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="expiry-date">Fecha de Vencimiento:</label>
+                        <input type="text" id="expiry-date" placeholder="MM/AA" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV:</label>
+                        <input type="text" id="cvv" placeholder="XXX" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-name">Nombre en la Tarjeta:</label>
+                    <input type="text" id="card-name" placeholder="Nombre Apellido" required>
+                </div>
+            </div>
+
+            <div id="qr-fields" class="hidden qr-code-section">
+                <p>Escanea el siguiente código QR con tu billetera virtual para completar el pago.</p>
+                <img id="qr-image" src="https://placehold.co/200x200/000000/FFFFFF?text=QR+Code" alt="Código QR de Pago">
+                <p class="text-sm text-gray-500">Este QR es una simulación. En una implementación real, sería generado por la pasarela de pago.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email para recibir tus boletos:</label>
+                <input type="email" id="email" placeholder="tu@ejemplo.com" required>
+            </div>
+
+            <button type="submit" class="payment-button">Confirmar Pago</button>
+        </form>
+    </div>
+
+    <script>
+        // Función para obtener parámetros de la URL
+        function getQueryParams() {
+            const params = {};
+            window.location.search.substring(1).split('&').forEach(param => {
+                const [key, value] = param.split('=');
+                params[key] = decodeURIComponent(value);
+            });
+            return params;
+        }
+
+        const queryParams = getQueryParams();
+        document.getElementById('display-total-amount').textContent = parseFloat(queryParams.total || 0).toFixed(2);
+        document.getElementById('display-adult-tickets').textContent = queryParams.adultTickets || 0;
+        document.getElementById('display-child-tickets').textContent = queryParams.childTickets || 0;
+        document.getElementById('display-senior-tickets').textContent = queryParams.seniorTickets || 0;
+
+        /**
+         * Alterna la visibilidad de los campos de pago según el método seleccionado.
+         */
+        function togglePaymentFields() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const cardFields = document.getElementById('card-fields');
+            const qrFields = document.getElementById('qr-fields');
+
+            if (paymentMethod === 'credit_debit') {
+                cardFields.classList.remove('hidden');
+                qrFields.classList.add('hidden');
+                // Hacer los campos de tarjeta requeridos
+                cardFields.querySelectorAll('input').forEach(input => input.setAttribute('required', ''));
+                document.getElementById('email').setAttribute('required', '');
+            } else { // qr_wallet
+                cardFields.classList.add('hidden');
+                qrFields.classList.remove('hidden');
+                // Remover el atributo required de los campos de tarjeta
+                cardFields.querySelectorAll('input').forEach(input => input.removeAttribute('required'));
+                document.getElementById('email').setAttribute('required', ''); // Email sigue siendo requerido
+            }
+        }
+
+        // Inicializar los campos de pago al cargar la página
+        window.onload = togglePaymentFields;
+
+        document.getElementById('payment-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío del formulario por defecto
+
+            const email = document.getElementById('email').value;
+            const totalAmount = document.getElementById('display-total-amount').textContent;
+            const paymentMethod = document.getElementById('payment-method').value;
+
+            if (!email) {
+                alert('Por favor, ingresa tu dirección de correo electrónico.');
+                return;
+            }
+
+            // Simulación de envío de datos al backend y recepción de QR/código único
+            console.log('Simulando procesamiento de pago...');
+            console.log('Email:', email);
+            console.log('Total:', totalAmount);
+            console.log('Método de Pago:', paymentMethod);
+
+            // Simulación de generación de un código QR y un código único
+            const uniqueCode = 'ZOO-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+            const qrData = JSON.stringify({
+                code: uniqueCode,
+                total: totalAmount,
+                adult: queryParams.adultTickets,
+                child: queryParams.childTickets,
+                senior: queryParams.seniorTickets,
+                email: email
+            });
+
+            // En una aplicación real, el backend generaría el QR y lo enviaría por email
+            // Aquí solo simulamos la alerta de envío.
+            alert(`¡Pago exitoso! Tus boletos con el código único "${uniqueCode}" y el código QR han sido enviados a: ${email}. Revisa tu bandeja de entrada.`);
+
+            // Opcional: Redirigir a una página de confirmación o a la página principal
+            // window.location.href = 'confirmation.html';
+        });
+    </script>
+</body>
+</html>

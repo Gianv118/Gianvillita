@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boletos del Zoológico</title>
+    <!-- Enlace a Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Un gris azulado claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        .ticket-card {
+            background-color: #edf2f7; /* Un gris muy claro */
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e2e8f0;
+        }
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        .ticket-card h3 {
+            color: #2d3748; /* Gris oscuro */
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .ticket-card p {
+            color: #4a5568; /* Gris medio */
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        .price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2b6cb0; /* Azul fuerte */
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .quantity-control button {
+            background-color: #4299e1; /* Azul */
+            color: white;
+            border: none;
+            border-radius: 9999px; /* Completamente redondo */
+            width: 38px;
+            height: 38px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .quantity-control button:hover {
+            background-color: #3182ce; /* Azul más oscuro */
+        }
+        .quantity-control input {
+            width: 60px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 5px;
+            color: #2d3748;
+        }
+        .total-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .checkout-button {
+            background-color: #38a169; /* Verde */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .checkout-button:hover {
+            background-color: #2f855a; /* Verde más oscuro */
+            transform: translateY(-2px);
+        }
+        .payment-options {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .payment-options h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .payment-icons img {
+            height: 40px;
+            width: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-8">Compra tus Boletos para el Zoológico</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Boleto para Mayores de 18 años -->
+            <div class="ticket-card" data-price="25.00">
+                <h3 class="text-blue-800">Boleto Adulto (+18 años)</h3>
+                <p class="text-gray-600">Acceso general para visitantes mayores de 18 años.</p>
+                <div class="price">$<span id="price-adult">25.00</span></div>
+                <div class="quantity-control">
+                    <button onclick="updateQuantity('adult', -1)">-</button>
+                    <input type="number" id="quantity-adult" value="0" min="0" readonly>
+                    <button onclick="updateQuantity('adult', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Boleto para Menores de 6 años -->
+            <div class="ticket-card" data-price="10.00">
+                <h3 class="text-green-800">Boleto Infantil (-6 años)</h3>
+                <p class="text-gray-600">Acceso para niños menores de 6 años. ¡Diversión garantizada!</p>
+                <div class="price">$<span id="price-child">10.00</span></div>
+                <div class="quantity-control">
+                    <button onclick="updateQuantity('child', -1)">-</button>
+                    <input type="number" id="quantity-child" value="0" min="0" readonly>
+                    <button onclick="updateQuantity('child', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Boleto para Adultos Mayores (+65 años) -->
+            <div class="ticket-card" data-price="15.00">
+                <h3 class="text-purple-800">Boleto Adulto Mayor (+65 años)</h3>
+                <p class="text-gray-600">Tarifa especial para visitantes mayores de 65 años.</p>
+                <div class="price">$<span id="price-senior">15.00</span></div>
+                <div class="quantity-control">
+                    <button onclick="updateQuantity('senior', -1)">-</button>
+                    <input type="number" id="quantity-senior" value="0" min="0" readonly>
+                    <button onclick="updateQuantity('senior', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="total-section">
+            Total a pagar: $<span id="total-amount">0.00</span>
+        </div>
+
+        <div class="payment-options">
+            <h4>Métodos de Pago Aceptados</h4>
+            <div class="payment-icons">
+                <img src="https://placehold.co/60x40/007bff/ffffff?text=Débito" alt="Tarjeta de Débito">
+                <img src="https://placehold.co/60x40/28a745/ffffff?text=Crédito" alt="Tarjeta de Crédito">
+                <img src="https://placehold.co/60x40/ffc107/000000?text=QR" alt="Pago con QR">
+                <!-- Puedes añadir más iconos de billeteras virtuales aquí -->
+            </div>
+        </div>
+
+        <button class="checkout-button" onclick="proceedToPayment()">Proceder al Pago</button>
+    </div>
+
+    <script>
+        // Precios de los boletos
+        const ticketPrices = {
+            adult: 25.00,
+            child: 10.00,
+            senior: 15.00
+        };
+
+        // Cantidades de boletos seleccionadas
+        const ticketQuantities = {
+            adult: 0,
+            child: 0,
+            senior: 0
+        };
+
+        /**
+         * Actualiza la cantidad de un tipo de boleto específico.
+         * @param {string} type - El tipo de boleto ('adult', 'child', 'senior').
+         * @param {number} change - La cantidad a sumar o restar (1 o -1).
+         */
+        function updateQuantity(type, change) {
+            const inputElement = document.getElementById(`quantity-${type}`);
+            let currentQuantity = parseInt(inputElement.value);
+
+            // Asegura que la cantidad no sea negativa
+            currentQuantity = Math.max(0, currentQuantity + change);
+
+            ticketQuantities[type] = currentQuantity;
+            inputElement.value = currentQuantity;
+
+            updateTotal(); // Actualiza el total cada vez que cambia una cantidad
+        }
+
+        /**
+         * Calcula y actualiza el monto total a pagar.
+         */
+        function updateTotal() {
+            let total = 0;
+            for (const type in ticketQuantities) {
+                total += ticketQuantities[type] * ticketPrices[type];
+            }
+            document.getElementById('total-amount').textContent = total.toFixed(2);
+        }
+
+        /**
+         * Función que se ejecuta al hacer clic en "Proceder al Pago".
+         * Aquí se enviaría la información al backend para iniciar el proceso de pago.
+         */
+        function proceedToPayment() {
+            const totalAmount = parseFloat(document.getElementById('total-amount').textContent);
+            if (totalAmount === 0) {
+                alert('Por favor, selecciona al menos un boleto para proceder.');
+                return;
+            }
+
+            // Aquí se simularía el envío de datos al backend
+            const orderDetails = {
+                adultTickets: ticketQuantities.adult,
+                childTickets: ticketQuantities.child,
+                seniorTickets: ticketQuantities.senior,
+                total: totalAmount,
+                // Podrías añadir más detalles como la fecha de visita, etc.
+            };
+
+            console.log('Detalles del pedido:', orderDetails);
+            // En una aplicación real, aquí harías una solicitud fetch/AJAX al backend
+            // Por ejemplo:
+            /*
+            fetch('/api/purchase-ticket/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderDetails),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Manejar la respuesta del backend (ej. redirigir a la pasarela de pago)
+                console.log('Respuesta del backend:', data);
+                alert('Simulación de pago: Se ha iniciado el proceso de pago. En una aplicación real, serías redirigido a una pasarela de pago.');
+            })
+            .catch(error => {
+                console.error('Error al procesar el pago:', error);
+                alert('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
+            });
+            */
+            alert(`Simulación de pago: Total a pagar $${totalAmount.toFixed(2)}. En una aplicación real, serías redirigido a una pasarela de pago para completar la compra y recibirías el QR.`);
+        }
+
+        // Inicializa el total al cargar la página
+        window.onload = updateTotal;
+    </script>
+</body>
+</html>
